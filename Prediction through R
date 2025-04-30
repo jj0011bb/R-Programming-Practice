@@ -1,0 +1,351 @@
+#The assignment is: Read the “bank-1.csv” file and answer the following questions using R Programming.
+
+#1. Apply data visualization techniques to tell the story of the data.
+
+#2. Describe demographic characteristics of data.
+
+#3. The marketing campaigns were based on phone calls. Often, more than one contact to the same client was required. In order to access if the product (bank term deposit) would be ('yes') or not ('no') subscribed, fit a logistic regression model and
+
+#(i) describe your model parameters
+
+#(ii) predict the target for a new client
+
+
+
+
+
+
+# ---------------------------------------------------------------------------------------------------------------
+# 1. Apply data visualization techniques to tell the story of the data.
+# ---------------------------------------------------------------------------------------------------------------
+
+# Install required packages [I took help from youtube videos(freecodecamp) for these]
+install.packages("ggplot2")  # For data visualization
+install.packages("readr")    # For reading CSV files
+install.packages("dplyr")    # For data manipulation
+install.packages("caret")    # For logistic regression and model evaluation
+install.packages("pROC")     # For ROC curve and AUC
+install.packages("gmodels")  # For cross-tabulation and chi-square tests
+
+# Load necessary libraries [I took help from youtube videos(freecodecamp) for these]
+library(ggplot2)  
+library(readr)    
+library(dplyr)    
+library(caret)    
+library(pROC)     
+library(gmodels)  
+
+# Check if the libraries are installed
+
+"ggplot2" %in% installed.packages()
+
+"readr" %in% installed.packages()
+
+"dplyr" %in% installed.packages()
+
+"caret" %in% installed.packages()
+
+"pROC" %in% installed.packages()
+
+"gmodels" %in% installed.packages()
+
+
+# Read the data from the CSV file
+
+bank_data <- read.csv(file="C:/MIS410/bank-1.csv")
+
+
+# Display the first few rows of the data 
+head(bank_data)
+
+# Check the structure of the data
+str(bank_data)
+
+# Summary statistics of the data
+summary(bank_data)
+
+# Distribution of Age
+ggplot(bank_data, aes(x = age)) +
+  geom_histogram(binwidth = 5, fill = "blue", color = "black") +
+  labs(title = "Distribution of Age", x = "Age", y = "Count") +
+  theme_minimal()
+
+# Distribution of Job Types
+ggplot(bank_data, aes(x = job)) +
+  geom_bar(fill = "navy") +
+  labs(title = "Distribution of Job Types", x = "Job", y = "Count") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# Relationship between Age and Balance
+ggplot(bank_data, aes(x = age, y = balance)) +
+  geom_point(alpha = 0.5, color = "maroon") +
+  labs(title = "Age vs Balance", x = "Age", y = "Balance") +
+  theme_minimal()
+
+# Distribution of Marital Status
+ggplot(bank_data, aes(x = marital)) +
+  geom_bar(fill = "purple") +
+  labs(title = "Distribution of Marital Status", x = "Marital Status", y = "Count") +
+  theme_minimal()
+
+# Distribution of Education Levels
+ggplot(bank_data, aes(x = education)) +
+  geom_bar(fill = "pink") +
+  labs(title = "Distribution of Education Levels", x = "Education", y = "Count") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+
+#######base R functions used in class for visualization and analysiss:
+
+
+
+# 1. Histogram of Age 
+hist(bank_data$age, 
+     breaks = 20, 
+     col = "blue", 
+     main = "Distribution of Age", 
+     xlab = "Age", 
+     ylab = "Frequency")
+
+# 2. Barplot of Job Types 
+job_counts <- table(bank_data$job)
+barplot(job_counts, 
+        col = "pink", 
+        main = "Distribution of Job Types", 
+        xlab = "Job", 
+        ylab = "Count", 
+        las = 2)  # Rotate x-axis labels vertically
+
+# 3. Scatterplot of Age vs Balance 
+plot(bank_data$age, bank_data$balance, 
+     pch = 19, 
+     col = "maroon", 
+     main = "Age vs Balance", 
+     xlab = "Age", 
+     ylab = "Balance")
+
+# 4. Boxplot for Balance grouped by Deposit
+ggplot(bank_data, aes(x = deposit, y = balance, fill = deposit)) +
+  geom_boxplot() +
+  labs(title = "Distribution of Balance by Deposit Subscription",
+       x = "Deposit Subscription",
+       y = "Balance") +
+  theme_minimal()
+
+# 5. Boxplot for Age grouped by Deposit
+ggplot(bank_data, aes(x = deposit, y = age, fill = deposit)) +
+  geom_boxplot() +
+  labs(title = "Distribution of Age by Deposit Subscription",
+       x = "Deposit Subscription",
+       y = "Age") +
+  theme_minimal()
+
+# ----------------------------------------------------------------------------------------------------------------------
+# Frequency Tables (Base R)
+# --------------------------------------------------------------------------------------------------------------------------------
+
+# Frequency table for "deposit" (target variable)
+deposit_table <- table(bank_data$deposit)
+deposit_table
+
+# Frequency table for "marital" status
+marital_table <- table(bank_data$marital)
+marital_table
+
+# Relative frequency table for "education"
+education_rel_table <- prop.table(table(bank_data$education))
+education_rel_table
+
+# Cross-tabulation: Job vs Deposit
+job_deposit_table <- table(bank_data$job, bank_data$deposit)
+job_deposit_table
+
+# Add row/column margins for better readability
+addmargins(job_deposit_table)
+
+# -----------------------------------------------------------------------------------------------
+# interpretation of results:(Data Visualization:)
+ 
+  #The visualizations provided key insights into the dataset:
+  
+      #Age Distribution: Most clients are between 30 and 50 years old, as seen in the histogram.
+      #Job Distribution: The majority of clients belong to management, blue-collar, and technician job categories.
+      #Age vs Balance: The scatterplot suggests no strong correlation between age and account balance.
+      #Marital Status Distribution: The majority of clients are married.
+      #Education Levels: Most clients have secondary or tertiary education.
+# -------------------------------------------------------------------------------------------------------
+
+###############################################################################################
+
+#----------------------------------------------------------------------------------------------------------
+## 2. Describe demographic characteristics of data.(Descriptive Statistics and Cross-Tabulation)
+#-----------------------------------------------------------------------------------------------------------
+
+# Summary statistics for age
+summary(bank_data$age)
+
+# Summary statistics for balance
+summary(bank_data$balance)
+
+# Cross-tabulation of Job vs Deposit
+CrossTable(bank_data$job, bank_data$deposit, prop.chisq = TRUE, chisq = TRUE)
+
+# Cross-tabulation of Marital Status vs Deposit
+CrossTable(bank_data$marital, bank_data$deposit, prop.chisq = TRUE, chisq = TRUE)
+
+# Cross-tabulation of Education vs Deposit
+CrossTable(bank_data$education, bank_data$deposit, prop.chisq = TRUE, chisq = TRUE)
+
+# Chi-square test for association between Job and Deposit
+chisq.test(table(bank_data$job, bank_data$deposit))
+
+
+# Chi-square test for association between Marital Status and Deposit
+chisq.test(bank_data$marital, bank_data$deposit)
+
+# Chi-square test for association between Education and Deposit
+chisq.test(bank_data$education, bank_data$deposit)
+
+###ANOVA and Correlation Analysis
+
+# ANOVA for Balance vs Deposit
+aov_result <- aov(balance ~ deposit, data = bank_data)
+summary(aov_result)
+
+# ANOVA for Age vs Deposit
+aov_result_age <- aov(age ~ deposit, data = bank_data)
+summary(aov_result_age)
+
+# Correlation between Age and Balance
+cor(bank_data$age, bank_data$balance)
+
+# Test the significance of the correlation
+cor.test(bank_data$age, bank_data$balance)
+
+
+# -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+# interpretation of results:(Demographic Characteristics:)
+
+    #Age: The median age is 39 years, with a range from 18 to 95.
+    #Balance: The median account balance is 550, but there is a large spread (ranging from -6847 to 81204).
+    #Marital Status: Most clients are married (57%), followed by single (32%) and divorced (11%).
+    #Education: 49% of clients have secondary education, followed by 33% with tertiary education.
+    #Job vs Deposit Subscription: Clients in management and retired groups have a higher tendency to subscribe to deposits, while blue-collar workers have the lowest.
+    
+
+###Statistical Tests:
+  
+    #Chi-square tests confirmed significant relationships between job type, marital status, and education with deposit subscription.
+    #ANOVA results indicate significant differences in balance and age between those who subscribed vs. those who didn’t.
+    #Correlation between Age and Balance: Weak positive correlation (0.112), meaning older clients tend to have slightly higher balances.
+
+# ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+######################################################################################
+
+
+# -----------------------------------------------------------------------------------------------------------------------------
+# 3 - Fit a logistic regression model to predict whether a client will subscribe to the bank term deposit (deposit).
+# -----------------------------------------------------------------------------------------------------------------------------
+
+# Convert the target variable to a factor
+bank_data$deposit <- factor(bank_data$deposit, levels = c("no", "yes"))
+bank_data$job <- as.factor(bank_data$job)
+bank_data$marital <- as.factor(bank_data$marital)
+bank_data$education <- as.factor(bank_data$education)
+bank_data$housing <- as.factor(bank_data$housing)
+bank_data$loan <- as.factor(bank_data$loan)
+bank_data$contact <- as.factor(bank_data$contact)
+bank_data$month <- as.factor(bank_data$month)
+bank_data$poutcome <- as.factor(bank_data$poutcome)
+
+
+# Split the data into training and testing sets (75% training, 25% testing)
+set.seed(123)  # For reproducibility
+train_index <- createDataPartition(bank_data$deposit, p = 0.75, list = FALSE)
+train_data <- bank_data[train_index, ]
+test_data <- bank_data[-train_index, ]
+
+# Fit the logistic regression model
+logistic_model <- glm(deposit ~ age + job + marital + education + balance + housing + loan + contact + day + month + duration + campaign + pdays + previous + poutcome, 
+                      data = train_data, family = binomial)
+
+# Summary of the model to describe the parameters
+summary(logistic_model)
+
+# Predict the target for the test data
+test_data$predicted_prob <- predict(logistic_model, test_data, type = "response")
+test_data$predicted_class <- ifelse(test_data$predicted_prob > 0.5, "yes", "no")
+
+# Confusion Matrix
+confusion_matrix <- table(test_data$deposit, test_data$predicted_class)
+confusion_matrix
+
+# Calculate accuracy
+accuracy <- sum(diag(confusion_matrix)) / sum(confusion_matrix)
+accuracy
+
+# ROC Curve and AUC
+roc_curve <- roc(test_data$deposit, test_data$predicted_prob)
+plot(roc_curve, main = "ROC Curve", col = "blue")
+auc(roc_curve)
+
+# --------------------------------------------------------------------------------------------------------------------------------------------------------
+##### Result: The model predicts deposit subscription with 81.7% accuracy and an AUC of 0.90, indicating strong classification performance.
+
+###Key Predictors:
+
+##Increases likelihood of subscription:
+  
+  #Higher education (tertiary)
+  #Retired individuals and students
+  #Higher account balance
+  #Previous successful marketing outcomes
+  #Contact in March, October, and September
+
+##Decreases likelihood of subscription:
+  
+   #Blue-collar jobs
+   #Having a housing or personal loan
+   #Unknown contact sources
+   #Marketing campaigns in May, June, and July
+   #Higher number of past campaigns
+# ------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+#i. Predict whether a new client will subscribe to the term deposit.
+
+
+# Create a new client data frame
+
+
+new_client <- data.frame(
+  age = 45,
+  job = factor("management", levels = levels(bank_data$job)),
+  marital = factor("married", levels = levels(bank_data$marital)),
+  education = factor("tertiary", levels = levels(bank_data$education)),
+  balance = 1500,
+  housing = factor("yes", levels = levels(bank_data$housing)),
+  loan = factor("no", levels = levels(bank_data$loan)),
+  contact = factor("unknown", levels = levels(bank_data$contact)),
+  day = 10,
+  month = factor("may", levels = levels(bank_data$month)),
+  duration = 500,
+  campaign = 1,
+  pdays = -1,
+  previous = 0,
+  poutcome = factor("unknown", levels = levels(bank_data$poutcome))
+)
+
+# Predict the probability of subscribing to the term deposit
+new_client$predicted_prob <- predict(logistic_model, new_client, type = "response")
+new_client$predicted_class <- ifelse(new_client$predicted_prob > 0.5, "yes", "no")
+
+# Display the prediction
+new_client
+
+# --------------------------------------------------------------------------------------------------------------------------------
+#####Prediction Result: This client is unlikely to subscribe to a term deposit (probability 0.2293, classified as "No").
+# --------------------------------------------------------------------------------------------------------------------------------
+
