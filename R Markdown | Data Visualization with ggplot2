@@ -1,0 +1,122 @@
+---
+title: "R Markdown | Data Visualization with ggplot2"
+author: "Jannat"
+date: "2025-05-04"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+# Load all necessary libraries at the start
+
+library(ggplot2)
+library(palmerpenguins)
+library(mgcv)
+library(tidyverse)
+```
+
+# 🐧 Penguin Data Visualizations
+
+## Scatter Plot: Flipper Length vs Body Mass by Species
+```{r penguins-scatter}
+ggplot(data = penguins, aes(x = flipper_length_mm, y = body_mass_g)) + 
+  geom_point(aes(color = species, shape = species))
+```
+
+## Bar Plot: Flipper Length Distribution by Species
+```{r penguins-bar}
+ggplot(data = penguins) + 
+  geom_bar(mapping = aes(x = flipper_length_mm, color = species))
+```
+
+## GAM Smoothed Trend: Flipper Length vs Body Mass
+```{r gam-smooth-penguins}
+ggplot(data = penguins, aes(x = flipper_length_mm, y = body_mass_g)) + 
+  geom_point(aes(color = species, shape = species)) +
+  geom_smooth(method = "gam", formula = y ~ s(x))
+```
+
+# 🏨 Hotel Bookings Analysis
+
+```{r read-data, echo=TRUE}
+hotel_bookings <- read.csv("hotel_bookings.csv")
+```
+
+## Distribution Channel by Deposit Type
+```{r distribution-channel-deposit}
+ggplot(data = hotel_bookings) + 
+  geom_bar(mapping = aes(x = distribution_channel, color = deposit_type)) +
+  facet_wrap(~deposit_type)
+```
+
+## Bar Chart with Rotated Axis Labels (Faceted)
+```{r bar-rotated-labels}
+ggplot(data = hotel_bookings) + 
+  geom_bar(mapping = aes(x = distribution_channel, color = distribution_channel)) +
+  facet_grid(~deposit_type) +
+  theme(axis.text.x = element_text(angle = 45))
+```
+
+## Facet Wrap with Deposit Type and Market Segment
+```{r facet-double}
+ggplot(data = hotel_bookings) +
+  geom_bar(mapping = aes(x = distribution_channel, color = deposit_type)) +
+  facet_wrap(~deposit_type ~ market_segment) +
+  theme(axis.text.x = element_text(angle = 45))
+```
+
+## Market Segment by Hotel
+```{r hotel-market}
+ggplot(data = hotel_bookings) + 
+  geom_bar(mapping = aes(x = hotel, fill = market_segment)) +
+  facet_wrap(~market_segment)
+```
+
+# 🎯 Focused Subset: Online TA City Hotels
+
+```{r filter-online-ta}
+onlineta_city_hotels <- hotel_bookings %>%
+  filter(hotel == "City Hotel", market_segment == "Online TA")
+```
+
+## Lead Time vs Children (Online TA City Hotels)
+```{r leadtime-children}
+ggplot(data = onlineta_city_hotels) + 
+  geom_point(mapping = aes(x = lead_time, y = children))
+```
+
+# 🚗 Additional Visualization with Annotations (mtcars)
+
+```{r annotation-base}
+p <- ggplot(mtcars, aes(x = wt, y = mpg)) + 
+  geom_point()
+p
+```
+
+## Add Text Annotation
+```{r text-annotate}
+p + annotate("text", x = 4, y = 25, label = "Some text")
+```
+
+## Add Styled Text with Data Frame
+```{r styled-text}
+annotation <- data.frame(
+  x = c(2, 4.5),
+  y = c(20, 25),
+  label = c("label 1", "label 2")
+)
+
+p + geom_text(data = annotation, aes(x = x, y = y, label = label),
+              color = "orange", size = 7, angle = 45, fontface = "bold")
+```
+
+## Add Rectangles
+```{r annotate-rect}
+p + annotate("rect", xmin = c(2, 4), xmax = c(3, 5),
+            ymin = c(20, 10), ymax = c(30, 20),
+            alpha = 0.5, color = "blue", fill = "blue")
+```
+
+## Add Arrow Segment
+```{r annotate-segment}
+p + annotate("segment", x = 1, xend = 3, y = 25, yend = 35,
+            colour = "purple", size = 3, alpha = 0.6, arrow = arrow())
